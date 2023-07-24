@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="crash_report_notifications_channel_name">Crash Reports</string>
+  <string name="crash_report_notification_title">Crash Report</string>
+  <string name="crash_report_notification_big_text_message_error_shared_storage_not_available">Failed to write to disk. externalFilesDirectory == null\n%1$s</string>
+  <string name="crash_report_notification_big_text_message_error_failed_to_create_directory">Failed to write to disk. Failed to create crash_reports directory.\n%1$s</string>
+  <string name="crash_report_notification_big_text_message_error_io_exception">Failed to write to disk. %1$s\n%2$s</string>
+  <string name="crash_report_notification_big_text_message_written_to_disk">Written to disk.\n%1$s</string>
+  <string name="crash_report_shortcut_label_short">Crashes</string>
+  <string name="crash_report_shortcut_label_long">Crash Reports</string>
+</resources>
