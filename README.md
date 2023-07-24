@@ -1,7 +1,9 @@
 Disk Crash Reporter
 =====================
 
-Get easy persistent crash logs on Android app debug builds.
+Get easy persistent crash logs on Android app debug builds. No code necessary. Add one dependency for your debug builds and never lose track of a crash while away from your computer again.
+
+When your app crashes, [`DiskCrashReporter`](diskcrashreporter/src/main/kotlin/com/nightlynexus/diskcrashreporter/DiskCrashReporter.kt) stores the stack trace in its own text file in your app’s external files directory. DiskCrashReporter then posts a notification and propagates the crash. The crash logger installs itself transparently with a ContentProvider.
 
 Download
 --------
