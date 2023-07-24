@@ -42,8 +42,8 @@ buildscript {
 }
 
 dependencies {
-  api 'androidx.core:core:1.10.1'
-  api 'androidx.annotation:annotation:1.6.0'
+  implementation 'androidx.core:core:1.10.1'
+  implementation 'androidx.annotation:annotation:1.6.0'
   implementation 'com.squareup.okio:okio:3.4.0'
   implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0'
 }
