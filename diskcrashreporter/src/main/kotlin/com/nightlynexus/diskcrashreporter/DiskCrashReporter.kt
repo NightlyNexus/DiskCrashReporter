@@ -18,6 +18,8 @@ import android.content.pm.ResolveInfo
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
+import android.media.AudioAttributes
+import android.media.RingtoneManager
 import android.os.Build.VERSION.SDK_INT
 import androidx.core.content.FileProvider
 import java.io.File
@@ -53,7 +55,6 @@ internal class DiskCrashReporter constructor(
       .setSmallIcon(R.drawable.disk_crash_reporter_icon)
       .setContentTitle(application.getText(R.string.crash_report_notification_title))
       .setContentText(message)
-      .setDefaults(Notification.DEFAULT_ALL)
 
     var bigTextMessage: String
     val externalFilesDirectory = application.getExternalFilesDir(null)
@@ -155,7 +156,18 @@ internal class DiskCrashReporter constructor(
         channelId,
         application.getText(R.string.crash_report_notifications_channel_name),
         IMPORTANCE_HIGH
-      )
+      ).apply {
+        enableVibration(true)
+        enableLights(true)
+        setSound(
+          RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+          AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+            .build()
+        )
+        setShowBadge(true)
+      }
     )
     notificationManager.notify(
       notificationIdProvider.notificationId,
