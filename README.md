@@ -9,7 +9,7 @@ Download
 Gradle:
 
 ```groovy
-debugImplementation 'com.nightlynexus.diskcrashreporter:diskcrashreporter:0.1.0'
+debugImplementation 'com.nightlynexus.diskcrashreporter:diskcrashreporter:0.2.0'
 ```
 
 License
