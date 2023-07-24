@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 apply plugin: "com.vanniktech.maven.publish"
 
 android {
@@ -17,6 +18,10 @@ android {
     textOutput 'stdout'
     htmlReport true
     htmlOutput rootProject.file("lint-reports/${name}.html")
+  }
+
+  kotlinOptions {
+    jvmTarget = '1.8'
   }
 }
 
