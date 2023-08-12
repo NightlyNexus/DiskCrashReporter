@@ -42,7 +42,7 @@ internal class DiskCrashReporter constructor(
   private val directoryName = "crash_reports"
   private val fileNameFormat = object : ThreadLocal<Format>() {
     override fun initialValue(): Format {
-      return SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z'.txt'", Locale.US).apply {
+      return SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US).apply {
         timeZone = TimeZone.getDefault()
       }
     }
@@ -176,14 +176,15 @@ internal class DiskCrashReporter constructor(
   }
 
   private fun file(parent: File): File {
-    val fileName = fileNameFormat.get()!!.format(Date())
+    val dateName = fileNameFormat.get()!!.format(Date())
+    val fileName = "$dateName.txt"
     var file = File(parent, fileName)
     if (!file.exists()) {
       return file
     }
     var count = 2
     while (true) {
-      file = File(parent, "$fileName $count")
+      file = File(parent, "$dateName ($count).txt")
       if (!file.exists()) {
         return file
       }
