@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 0.2.1 *(2023-08-12)*
+----------------------------
+
+* Fixed file names when adding number suffixes. The number now comes before the txt file extension and is surrounded by parentheses.
+
 Version 0.2.0 *(2023-07-24)*
 ----------------------------
 
