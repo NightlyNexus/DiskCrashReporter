@@ -1,7 +1,8 @@
 package com.nightlynexus.diskcrashreporter
 
+import kotlin.random.Random
+
 internal class NotificationIdProvider {
-  var notificationId = 0
-    get() = ++field
-    private set
+  val notificationId
+    get() = Random.nextInt(1, Int.MAX_VALUE)
 }
