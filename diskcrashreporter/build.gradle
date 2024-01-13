@@ -6,6 +6,7 @@ android {
   namespace 'com.nightlynexus.diskcrashreporter'
 
   defaultConfig {
+    compileSdk 34
     minSdkVersion 26
   }
 
