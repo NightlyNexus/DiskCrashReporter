@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 0.2.2 *(2024-01-13)*
+----------------------------
+
+* Changed the file provider class name to prevent clashing with other file providers.
+
 Version 0.2.1 *(2023-08-12)*
 ----------------------------
 
