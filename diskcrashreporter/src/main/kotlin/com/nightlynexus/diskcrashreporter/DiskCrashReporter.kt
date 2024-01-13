@@ -33,7 +33,7 @@ import java.util.TimeZone
 import okio.buffer
 import okio.sink
 
-internal class DiskCrashReporter constructor(
+internal class DiskCrashReporter(
   private val application: Application,
   private val notificationIdProvider: NotificationIdProvider
 ) {
