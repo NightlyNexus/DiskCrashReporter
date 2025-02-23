@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 0.2.3 *(2025-02-23)*
+----------------------------
+
+* Remove the queries manifest declaration by using Intent.resolveActivity correctly.
+
 Version 0.2.2 *(2024-01-13)*
 ----------------------------
 
