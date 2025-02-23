@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 0.2.5 *(2025-02-23)*
+----------------------------
+
+* Report and save the whole stack trace, not just the cause.
+
 Version 0.2.4 *(2025-02-23)*
 ----------------------------
 
