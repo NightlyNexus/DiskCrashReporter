@@ -13,14 +13,11 @@ import android.content.Intent
 import android.content.Intent.ACTION_VIEW
 import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
 import android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
 import android.media.AudioAttributes
 import android.media.RingtoneManager
-import android.os.Build.VERSION.SDK_INT
 import androidx.core.content.FileProvider
 import java.io.File
 import java.io.IOException
@@ -90,7 +87,7 @@ internal class DiskCrashReporter(
             setDataAndType(data, "text/plain")
             addFlags(FLAG_GRANT_READ_URI_PERMISSION or FLAG_GRANT_WRITE_URI_PERMISSION)
           }
-          if (application.packageManager.queryIntentActivities(textFileViewer).isNotEmpty()) {
+          if (textFileViewer.resolveActivity(application.packageManager) != null) {
             notificationBuilder.setContentIntent(
               PendingIntent.getActivity(
                 application,
@@ -102,18 +99,9 @@ internal class DiskCrashReporter(
 
             val shortcutManager = application.getSystemService(ShortcutManager::class.java)
 
-            /*val mainIntent = Intent(ACTION_MAIN)
-              .addCategory(Intent.CATEGORY_LAUNCHER)
-              .setPackage(application.packageName)
-            val activities = application.packageManager.queryIntentActivities(mainIntent)
-            val firstMainActivity = activities.first().activityInfo
-            val componentName =
-              ComponentName(firstMainActivity.packageName, firstMainActivity.name)*/
             val mainIntent =
               application.packageManager.getLaunchIntentForPackage(application.packageName)
             if (mainIntent != null) {
-              // If the component name is not guaranteed to be in this returned Intent, we will have
-              // to use the above old code.
               val componentName = mainIntent.component!!
               val shortcutCount = shortcutManager.dynamicShortcuts.count { shortcutInfo ->
                 shortcutInfo.activity == componentName
@@ -189,20 +177,6 @@ internal class DiskCrashReporter(
         return file
       }
       count++
-    }
-  }
-
-  private fun PackageManager.queryIntentActivities(intent: Intent): List<ResolveInfo> {
-    return if (SDK_INT >= 33) {
-      queryIntentActivities(
-        intent,
-        PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_ALL.toLong())
-      )
-    } else {
-      @Suppress("Deprecation") queryIntentActivities(
-        intent,
-        PackageManager.MATCH_ALL
-      )
     }
   }
 }
