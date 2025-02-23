@@ -45,8 +45,8 @@ internal class DiskCrashReporter(
     }
   }
 
-  fun report(cause: Throwable) {
-    val message = cause.message
+  fun report(throwable: Throwable) {
+    val message = throwable.message
 
     val notificationBuilder = Notification.Builder(application, channelId)
       .setSmallIcon(R.drawable.disk_crash_reporter_icon)
@@ -73,7 +73,7 @@ internal class DiskCrashReporter(
           file.sink()
             .buffer()
             .use { sink ->
-              cause.printStackTrace(PrintStream(sink.outputStream()))
+              throwable.printStackTrace(PrintStream(sink.outputStream()))
             }
 
           bigTextMessage = application.getString(

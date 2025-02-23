@@ -15,13 +15,7 @@ internal class DiskCrashReporterContentProvider : ContentProvider() {
     )
     val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()!!
     Thread.setDefaultUncaughtExceptionHandler { thread, e ->
-      var cause: Throwable = e
-      var forward = cause.cause
-      while (forward != null) {
-        cause = forward
-        forward = forward.cause
-      }
-      diskCrashReporter.report(cause)
+      diskCrashReporter.report(e)
       defaultHandler.uncaughtException(thread, e)
     }
     return true
