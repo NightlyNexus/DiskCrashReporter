@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 0.2.4 *(2025-02-23)*
+----------------------------
+
+* Revert removing queries from the manifest. Intent.resolveActivity is still an improvement.
+
 Version 0.2.3 *(2025-02-23)*
 ----------------------------
 
