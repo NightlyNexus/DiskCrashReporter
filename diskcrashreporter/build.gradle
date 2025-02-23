@@ -5,8 +5,9 @@ apply plugin: "com.vanniktech.maven.publish"
 android {
   namespace 'com.nightlynexus.diskcrashreporter'
 
+  compileSdk 35
+
   defaultConfig {
-    compileSdk 35
     minSdkVersion 26
   }
 
