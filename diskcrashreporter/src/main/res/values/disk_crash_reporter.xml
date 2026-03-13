@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <string name="crash_report_directory_name">crash_reports</string>
   <string name="crash_report_notifications_channel_name">Crash Reports</string>
   <string name="crash_report_notification_title">Crash Report</string>
   <string name="crash_report_notification_big_text_message_error_shared_storage_not_available">Failed to write to disk. externalFilesDirectory == null\n%1$s</string>

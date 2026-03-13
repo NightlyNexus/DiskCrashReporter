@@ -36,7 +36,6 @@ internal class DiskCrashReporter(
 ) {
   private val channelId = "crash_reporter"
   private val shortcutId = "crash_reports"
-  private val directoryName = "crash_reports"
   private val fileNameFormat = object : ThreadLocal<Format>() {
     override fun initialValue(): Format {
       return SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US).apply {
@@ -61,6 +60,7 @@ internal class DiskCrashReporter(
         message
       )
     } else {
+      val directoryName = application.getString(R.string.crash_report_directory_name)
       val parentDirectory = File(externalFilesDirectory, directoryName)
       if (!parentDirectory.exists() && !parentDirectory.mkdirs()) {
         bigTextMessage = application.getString(
