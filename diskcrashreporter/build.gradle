@@ -1,14 +1,17 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: "com.vanniktech.maven.publish"
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+  id 'com.android.library'
+  id 'com.vanniktech.maven.publish'
+}
 
 android {
   namespace 'com.nightlynexus.diskcrashreporter'
 
-  compileSdk 35
+  compileSdk 36
 
   defaultConfig {
-    minSdkVersion 26
+    minSdkVersion 23
   }
 
   lintOptions {
@@ -20,8 +23,15 @@ android {
     htmlOutput rootProject.file("lint-reports/${name}.html")
   }
 
-  kotlinOptions {
-    jvmTarget = '1.8'
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_11
+    targetCompatibility JavaVersion.VERSION_11
+  }
+
+  kotlin {
+    compilerOptions {
+      jvmTarget = JvmTarget.JVM_11
+    }
   }
 }
 
@@ -30,20 +40,9 @@ repositories {
   mavenCentral()
 }
 
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-
-  dependencies {
-    classpath 'com.vanniktech:gradle-maven-publish-plugin:0.30.0'
-    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.10'
-  }
-}
-
 dependencies {
-  implementation 'androidx.core:core:1.15.0'
+  implementation 'androidx.core:core:1.18.0'
   implementation 'androidx.annotation:annotation:1.9.1'
-  implementation 'com.squareup.okio:okio:3.10.2'
-  implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.10'
+  implementation 'com.squareup.okio:okio:3.17.0'
+  implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.3.10'
 }
