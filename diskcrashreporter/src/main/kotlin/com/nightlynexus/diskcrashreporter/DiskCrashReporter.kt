@@ -51,7 +51,12 @@ internal class DiskCrashReporter(
   fun report(throwable: Throwable) {
     val message = throwable.message
 
-    val notificationBuilder = Notification.Builder(application, channelId)
+    val notificationBuilder = if (SDK_INT >= 26) {
+      Notification.Builder(application, channelId)
+    } else {
+      @Suppress("DEPRECATION")
+      Notification.Builder(application)
+    }
       .setSmallIcon(R.drawable.disk_crash_reporter_icon)
       .setContentTitle(application.getText(R.string.crash_report_notification_title))
       .setContentText(message)
@@ -108,24 +113,31 @@ internal class DiskCrashReporter(
     notificationBuilder.style = Notification.BigTextStyle().bigText(bigTextMessage)
     val notificationManager =
       application.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.createNotificationChannel(
-      NotificationChannel(
-        channelId,
-        application.getText(R.string.crash_report_notifications_channel_name),
-        IMPORTANCE_HIGH
-      ).apply {
-        enableVibration(true)
-        enableLights(true)
-        setSound(
-          RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-          AudioAttributes.Builder()
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-            .build()
-        )
-        setShowBadge(true)
-      }
-    )
+    if (SDK_INT >= 26) {
+      notificationManager.createNotificationChannel(
+        NotificationChannel(
+          channelId,
+          application.getText(R.string.crash_report_notifications_channel_name),
+          IMPORTANCE_HIGH
+        ).apply {
+          enableVibration(true)
+          enableLights(true)
+          setSound(
+            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+            AudioAttributes.Builder()
+              .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+              .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+              .build()
+          )
+          setShowBadge(true)
+        }
+      )
+    } else {
+      @Suppress("DEPRECATION")
+      notificationBuilder
+        .setPriority(Notification.PRIORITY_HIGH)
+        .setDefaults(Notification.DEFAULT_ALL)
+    }
     notificationManager.notify(
       notificationIdProvider.notificationId,
       notificationBuilder.build()
