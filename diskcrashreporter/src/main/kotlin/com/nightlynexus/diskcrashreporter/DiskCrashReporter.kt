@@ -18,6 +18,9 @@ import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
 import android.media.AudioAttributes
 import android.media.RingtoneManager
+import android.os.Build.VERSION.SDK_INT
+import androidx.annotation.RequiresApi
+import androidx.annotation.WorkerThread
 import androidx.core.content.FileProvider
 import java.io.File
 import java.io.IOException
@@ -44,6 +47,7 @@ internal class DiskCrashReporter(
     }
   }
 
+  @WorkerThread
   fun report(throwable: Throwable) {
     val message = throwable.message
 
@@ -68,23 +72,9 @@ internal class DiskCrashReporter(
         )
       } else {
         val file = file(parentDirectory)
-        val exceptionWritingToFile = try {
-          file.sink()
-            .buffer()
-            .use { sink ->
-              throwable.printStackTrace(PrintStream(sink.outputStream()))
-            }
-          null
-        } catch (e: IOException) {
-          e
-        }
+        val exceptionWritingToFile = writeToFile(throwable, file)
 
-        val textFileViewer = Intent(ACTION_VIEW).apply {
-          val authority = "${application.packageName}.fileprovider"
-          val data = FileProvider.getUriForFile(application, authority, file)
-          setDataAndType(data, "text/plain")
-          addFlags(FLAG_GRANT_READ_URI_PERMISSION or FLAG_GRANT_WRITE_URI_PERMISSION)
-        }
+        val textFileViewer = textFileViewer(file)
         if (textFileViewer.resolveActivity(application.packageManager) != null) {
           notificationBuilder.setContentIntent(
             PendingIntent.getActivity(
@@ -95,33 +85,8 @@ internal class DiskCrashReporter(
             )
           )
 
-          val shortcutManager = application.getSystemService(ShortcutManager::class.java)
-
-          val mainIntent =
-            application.packageManager.getLaunchIntentForPackage(application.packageName)
-          if (mainIntent != null) {
-            val componentName = mainIntent.component!!
-            val shortcutCount = shortcutManager.dynamicShortcuts.count { shortcutInfo ->
-              shortcutInfo.activity == componentName
-            } + shortcutManager.manifestShortcuts.count { shortcutInfo ->
-              shortcutInfo.activity == componentName
-            }
-
-            if (shortcutCount < shortcutManager.maxShortcutCountPerActivity) {
-              val shortcutInfo = ShortcutInfo.Builder(application, shortcutId)
-                .setActivity(componentName)
-                .setShortLabel(application.getText(R.string.crash_report_shortcut_label_short))
-                .setLongLabel(application.getText(R.string.crash_report_shortcut_label_long))
-                .setIcon(
-                  Icon.createWithResource(
-                    application,
-                    R.drawable.disk_crash_reporter_icon
-                  )
-                )
-                .setIntent(textFileViewer)
-                .build()
-              shortcutManager.addDynamicShortcuts(listOf(shortcutInfo))
-            }
+          if (SDK_INT >= 25) {
+            setShortcut(textFileViewer)
           }
         }
 
@@ -165,6 +130,61 @@ internal class DiskCrashReporter(
       notificationIdProvider.notificationId,
       notificationBuilder.build()
     )
+  }
+
+  @WorkerThread
+  private fun writeToFile(throwable: Throwable, file: File): IOException? {
+    return try {
+      file.sink()
+        .buffer()
+        .use { sink ->
+          throwable.printStackTrace(PrintStream(sink.outputStream()))
+        }
+      null
+    } catch (e: IOException) {
+      e
+    }
+  }
+
+  private fun textFileViewer(file: File): Intent {
+    return Intent(ACTION_VIEW).apply {
+      val authority = "${application.packageName}.fileprovider"
+      val data = FileProvider.getUriForFile(application, authority, file)
+      setDataAndType(data, "text/plain")
+      addFlags(FLAG_GRANT_READ_URI_PERMISSION or FLAG_GRANT_WRITE_URI_PERMISSION)
+    }
+  }
+
+  @RequiresApi(25)
+  private fun setShortcut(textFileViewer: Intent) {
+    val shortcutManager = application.getSystemService(ShortcutManager::class.java)
+
+    val mainIntent =
+      application.packageManager.getLaunchIntentForPackage(application.packageName)
+    if (mainIntent != null) {
+      val componentName = mainIntent.component!!
+      val shortcutCount = shortcutManager.dynamicShortcuts.count { shortcutInfo ->
+        shortcutInfo.activity == componentName
+      } + shortcutManager.manifestShortcuts.count { shortcutInfo ->
+        shortcutInfo.activity == componentName
+      }
+
+      if (shortcutCount < shortcutManager.maxShortcutCountPerActivity) {
+        val shortcutInfo = ShortcutInfo.Builder(application, shortcutId)
+          .setActivity(componentName)
+          .setShortLabel(application.getText(R.string.crash_report_shortcut_label_short))
+          .setLongLabel(application.getText(R.string.crash_report_shortcut_label_long))
+          .setIcon(
+            Icon.createWithResource(
+              application,
+              R.drawable.disk_crash_reporter_icon
+            )
+          )
+          .setIntent(textFileViewer)
+          .build()
+        shortcutManager.addDynamicShortcuts(listOf(shortcutInfo))
+      }
+    }
   }
 
   private fun file(parent: File): File {
