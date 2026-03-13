@@ -52,10 +52,9 @@ internal class DiskCrashReporter(
       .setContentTitle(application.getText(R.string.crash_report_notification_title))
       .setContentText(message)
 
-    var bigTextMessage: String
     val externalFilesDirectory = application.getExternalFilesDir(null)
-    if (externalFilesDirectory == null) {
-      bigTextMessage = application.getString(
+    val bigTextMessage = if (externalFilesDirectory == null) {
+      application.getString(
         R.string.crash_report_notification_big_text_message_error_shared_storage_not_available,
         message
       )
@@ -63,73 +62,78 @@ internal class DiskCrashReporter(
       val directoryName = application.getString(R.string.crash_report_directory_name)
       val parentDirectory = File(externalFilesDirectory, directoryName)
       if (!parentDirectory.exists() && !parentDirectory.mkdirs()) {
-        bigTextMessage = application.getString(
+        application.getString(
           R.string.crash_report_notification_big_text_message_error_failed_to_create_directory,
           message
         )
       } else {
         val file = file(parentDirectory)
-        try {
+        val exceptionWritingToFile = try {
           file.sink()
             .buffer()
             .use { sink ->
               throwable.printStackTrace(PrintStream(sink.outputStream()))
             }
+          null
+        } catch (e: IOException) {
+          e
+        }
 
-          bigTextMessage = application.getString(
+        val textFileViewer = Intent(ACTION_VIEW).apply {
+          val authority = "${application.packageName}.fileprovider"
+          val data = FileProvider.getUriForFile(application, authority, file)
+          setDataAndType(data, "text/plain")
+          addFlags(FLAG_GRANT_READ_URI_PERMISSION or FLAG_GRANT_WRITE_URI_PERMISSION)
+        }
+        if (textFileViewer.resolveActivity(application.packageManager) != null) {
+          notificationBuilder.setContentIntent(
+            PendingIntent.getActivity(
+              application,
+              0,
+              textFileViewer,
+              FLAG_IMMUTABLE or FLAG_UPDATE_CURRENT
+            )
+          )
+
+          val shortcutManager = application.getSystemService(ShortcutManager::class.java)
+
+          val mainIntent =
+            application.packageManager.getLaunchIntentForPackage(application.packageName)
+          if (mainIntent != null) {
+            val componentName = mainIntent.component!!
+            val shortcutCount = shortcutManager.dynamicShortcuts.count { shortcutInfo ->
+              shortcutInfo.activity == componentName
+            } + shortcutManager.manifestShortcuts.count { shortcutInfo ->
+              shortcutInfo.activity == componentName
+            }
+
+            if (shortcutCount < shortcutManager.maxShortcutCountPerActivity) {
+              val shortcutInfo = ShortcutInfo.Builder(application, shortcutId)
+                .setActivity(componentName)
+                .setShortLabel(application.getText(R.string.crash_report_shortcut_label_short))
+                .setLongLabel(application.getText(R.string.crash_report_shortcut_label_long))
+                .setIcon(
+                  Icon.createWithResource(
+                    application,
+                    R.drawable.disk_crash_reporter_icon
+                  )
+                )
+                .setIntent(textFileViewer)
+                .build()
+              shortcutManager.addDynamicShortcuts(listOf(shortcutInfo))
+            }
+          }
+        }
+
+        if (exceptionWritingToFile == null) {
+          application.getString(
             R.string.crash_report_notification_big_text_message_written_to_disk,
             message
           )
-
-          val textFileViewer = Intent(ACTION_VIEW).apply {
-            val authority = "${application.packageName}.fileprovider"
-            val data = FileProvider.getUriForFile(application, authority, file)
-            setDataAndType(data, "text/plain")
-            addFlags(FLAG_GRANT_READ_URI_PERMISSION or FLAG_GRANT_WRITE_URI_PERMISSION)
-          }
-          if (textFileViewer.resolveActivity(application.packageManager) != null) {
-            notificationBuilder.setContentIntent(
-              PendingIntent.getActivity(
-                application,
-                0,
-                textFileViewer,
-                FLAG_IMMUTABLE or FLAG_UPDATE_CURRENT
-              )
-            )
-
-            val shortcutManager = application.getSystemService(ShortcutManager::class.java)
-
-            val mainIntent =
-              application.packageManager.getLaunchIntentForPackage(application.packageName)
-            if (mainIntent != null) {
-              val componentName = mainIntent.component!!
-              val shortcutCount = shortcutManager.dynamicShortcuts.count { shortcutInfo ->
-                shortcutInfo.activity == componentName
-              } + shortcutManager.manifestShortcuts.count { shortcutInfo ->
-                shortcutInfo.activity == componentName
-              }
-
-              if (shortcutCount < shortcutManager.maxShortcutCountPerActivity) {
-                val shortcutInfo = ShortcutInfo.Builder(application, shortcutId)
-                  .setActivity(componentName)
-                  .setShortLabel(application.getText(R.string.crash_report_shortcut_label_short))
-                  .setLongLabel(application.getText(R.string.crash_report_shortcut_label_long))
-                  .setIcon(
-                    Icon.createWithResource(
-                      application,
-                      R.drawable.disk_crash_reporter_icon
-                    )
-                  )
-                  .setIntent(textFileViewer)
-                  .build()
-                shortcutManager.addDynamicShortcuts(listOf(shortcutInfo))
-              }
-            }
-          }
-        } catch (e: IOException) {
-          bigTextMessage = application.getString(
+        } else {
+          application.getString(
             R.string.crash_report_notification_big_text_message_error_io_exception,
-            e.message,
+            exceptionWritingToFile.message,
             message
           )
         }
