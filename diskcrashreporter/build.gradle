@@ -8,7 +8,7 @@ plugins {
 android {
   namespace 'com.nightlynexus.diskcrashreporter'
 
-  compileSdk 36
+  compileSdk 37
 
   defaultConfig {
     minSdkVersion 21
@@ -41,8 +41,8 @@ repositories {
 }
 
 dependencies {
-  implementation 'androidx.core:core:1.18.0'
-  implementation 'androidx.annotation:annotation:1.9.1'
+  implementation 'androidx.core:core:1.19.0'
+  implementation 'androidx.annotation:annotation:1.10.0'
   implementation 'com.squareup.okio:okio:3.17.0'
-  implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.3.10'
+  implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.4.0'
 }
