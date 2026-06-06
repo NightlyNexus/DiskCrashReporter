@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 0.3.1 *(2026-06-05)*
+----------------------------
+
+* Remove the colon from crash log file names to make copying to Windows easy.
+
 Version 0.3.0 *(2026-03-13)*
 ----------------------------
 
