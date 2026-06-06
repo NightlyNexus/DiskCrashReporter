@@ -41,7 +41,7 @@ internal class DiskCrashReporter(
   private val shortcutId = "crash_reports"
   private val fileNameFormat = object : ThreadLocal<Format>() {
     override fun initialValue(): Format {
-      return SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US).apply {
+      return SimpleDateFormat("EEE_dd_MMM_yyyy_HH_mm_ss_z", Locale.US).apply {
         timeZone = TimeZone.getDefault()
       }
     }
